@@ -40,7 +40,7 @@ dragon = Monster(100, 10, 10, 2)
 player = Player(10, "Lumbridge")
 
 #Inventory
-inventory = []
+inventory = ['fishing rod']
 
 #Loot tables
 def gettable(tier):
@@ -70,7 +70,7 @@ def getloot(tier):
 			print ("You recieve a " + str(item))
 
 def home():
-	home_input = input("What do you want to do? 1=Combat 2=Gathering 3=Artisan 4=Inventory management\n")
+	home_input = input("What do you want to do? 1=Combat 2=Gathering 3=Artisan 4=Inventory management 5=See levels\n")
 	if home_input == 1:
 		combat_home()
 	elif home_input == 2:
@@ -79,10 +79,15 @@ def home():
 		artisan_home()
 	elif home_input == 4:
 		inventory_home()
+	elif home_input == 5:
+		display_levels()
 	else:
 		print ("Invalid input, please try again.")
 		home()
 
+def display_levels():
+	print ("Attack: " + str(attack.level) + " Defence: " + str(defence.level) + " Hitpoints " + str(hitpoints.level) + "\nFishing: " + str(fishing.level) + " Cooking: " + str(cooking.level) + " Mining: " + str(mining.level) + "\nSmithing: " + str(smithing.level))
+	home()
 
 def combat_home():
 	combat_home_input = input("What do you want to fight? 1=Goblin 2=Farmer 3=Dragon\n")
@@ -120,15 +125,88 @@ def inventory_home():
 			else:
 				home()
 
+def artisan_home():
+	artisan_home_input = input("What do you want to do? 1=Cooking 2=Smithing\n")
+	if artisan_home_input == 1:
+		cooking_home()
+	elif artisan_home_input == 2:
+		smithing_home()
+	else:
+		print ("Invalid input.")
+		home()
+
+def cooking_home():
+	print ("Cooking fish...")
+	level = cooking.level
+	print ("You start cooking...")
+	while 'salmon' in inventory:
+		time.sleep(1)
+		skillscheck = randint (0,10)
+		skillschance = (1 + level)
+		if (skillscheck + skillschance) >= 5:
+			inventory.remove('salmon')
+			inventory.append('cooked salmon')
+			print ("You cook the salmon")
+			cooking.xp += 100
+		else:
+			inventory.remove('salmon')
+			print ("You burn the salmon")
+	while 'trout' in inventory:
+		time.sleep(1)
+		skillscheck = randint (0,10)
+		skillschance = (1 + level)
+		if (skillscheck + skillschance) >= 5:
+			inventory.remove('trout')
+			inventory.append('cooked trout')
+			print ("You cook the trout")
+			cooking.xp += 100
+		else:
+			inventory.remove('trout')
+			print ("You burn the trout")
+	if level < getlevel(cooking.xp):
+		refreshlevel()
+		newlevel = cooking.level
+		print ("Congratulations! Your cooking level is now " + str(newlevel) + "!")
+
+	else:
+		refreshlevel()
+
+	home()
+
+
+
 def gathering_home():
 	gathering_home_input = input("What do you want to do? 1=Fishing 2=Mining\n")
 	if gathering_home_input == 1:
 		gathering_fish(player.location)
 	elif gathering_home_input == 2:
-		mining()
+		gathering_ore(player.location)
 	else:
 		print("Invalid input")
 		home()
+
+def gathering_ore(location):
+	level = mining.level
+	if location == "Lumbridge":
+		print ("You swing your pick at the rock...")
+		stillmining = 0
+		while stillmining == 0:
+			time.sleep(0.5)
+			print ("Swinging away...")
+			skillscheck = randint (0,10)
+			skillchance = (1 + level)
+			if (skillscheck + skillchance) >= 10:
+				oretype = randint(0,1)
+				if oretype == 0:
+					inventory.append('tin ore')
+					print('You mine some tin ore')
+					mining.xp += 30
+				else:
+					inventory.append('copper ore')
+					print ('You mine some copper ore')
+					mining.xp += 30
+				stillmining = 1
+				home()
 
 def gathering_fish(location):
 	level = fishing.level
@@ -153,7 +231,17 @@ def gathering_fish(location):
 						print ("You manage to catch a salmon!")
 						fishing.xp += 30
 					stillfishing = 1
-					gathering_fish()
+					if level < getlevel(fishing.xp):
+						print ("Congratulations! Your fishing level is now" + str(getlevel(fishing.xp)) + "!")
+						refreshlevel()
+					else:
+						refreshlevel()
+					gathering_fish(player.location)
+			if level < getlevel(fishing.xp):
+				refreshlevel()
+				print ("Congratulations! Your fishing level is now " + str(fishing.level) + "!")
+			else:
+				refreshlevel()
 		else:
 			print ("You need a fishing rod to do that.")
 
@@ -176,6 +264,11 @@ def gathering_fish(location):
 						inventory.append('casket')
 						print ("You catch a casket in your lobster pot.")
 						fishing.xp += 70
+					if level < getlevel(fishing.xp):
+						print ("Congratulations! Your fishing level is now " + str(getlevel(fishing.xp)) + "!")
+						refreshlevel()
+					else:
+						refreshlevel()
 					stillfishing = 1	
 					gathering_fish()
 		elif (fishing.level <=5):
@@ -290,7 +383,9 @@ def refreshlevel():
 	defence.level = getlevel(defence.xp)
 	hitpoints.level = getlevel(hitpoints.xp)
 	fishing.level = getlevel(fishing.xp)
-
+	cooking.level = getlevel(cooking.xp)
+	mining.level = getlevel(mining.xp)
+	smithing.level = getlevel(smithing.xp)
 
 
 home()
