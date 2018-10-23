@@ -2,6 +2,8 @@ import time
 from random import randint
 from random import choice
 
+#Things to do - stackable items
+
 class Skill:
 	
 	def __init__(self, xp, level):
@@ -26,7 +28,7 @@ class Monster:
 attack = Skill(0, 1)
 defence = Skill(0, 1)
 hitpoints = Skill (0, 1)
-fishing = Skill(0, 1)
+fishing = Skill(389, 5)
 mining = Skill(0, 1)
 smithing = Skill(0, 1)
 cooking = Skill(0, 1)
@@ -40,7 +42,7 @@ dragon = Monster(100, 10, 10, 2)
 player = Player(10, "Lumbridge")
 
 #Inventory
-inventory = ['fishing rod']
+inventory = ['copper ore', 'tin ore']
 
 #Loot tables
 def gettable(tier):
@@ -135,6 +137,16 @@ def artisan_home():
 		print ("Invalid input.")
 		home()
 
+def smithing_home():
+	smithing_home_input = input("What do you want to do? 1=Smith bronze 2=Smith iron\n")
+	if smithing_home_input == 1:
+		while (('copper ore' in inventory) and ('tin ore' in inventory)):
+			inventory.remove('copper ore')
+			inventory.remove('tin ore')
+			inventory.append('bronze bar')
+			print("You smelt a bronze bar")
+	home()
+
 def cooking_home():
 	print ("Cooking fish...")
 	level = cooking.level
@@ -198,13 +210,21 @@ def gathering_ore(location):
 			if (skillscheck + skillchance) >= 10:
 				oretype = randint(0,1)
 				if oretype == 0:
-					inventory.append('tin ore')
-					print('You mine some tin ore')
-					mining.xp += 30
+					if len(inventory) <= 8:
+						inventory.append('tin ore')
+						print('You mine some tin ore')
+						mining.xp += 30
+					else:
+						print("Your inventory is full")
+						mining.xp += 30
 				else:
-					inventory.append('copper ore')
-					print ('You mine some copper ore')
-					mining.xp += 30
+					if len(inventory) <= 8:
+						inventory.append('copper ore')
+						print ('You mine some copper ore')
+						mining.xp += 30
+					else:
+						print("Your inventory is full")
+						mining.xp +=30
 				stillmining = 1
 				home()
 
@@ -253,7 +273,7 @@ def gathering_fish(location):
 				time.sleep(0.5)
 				print ("Nothing yet...")
 				skillscheck = randint(0,10)
-				skillschance = (1 + level)
+				skillchance = (1 + level)
 				if (skillscheck + skillchance) >= 15:
 					fishtype = randint(0,3)
 					if (fishtype >= 0) and (fishtype < 3):
@@ -270,7 +290,7 @@ def gathering_fish(location):
 					else:
 						refreshlevel()
 					stillfishing = 1	
-					gathering_fish()
+					gathering_fish(player.location)
 		elif (fishing.level <=5):
 			print("You need to be fishing level 5 to do that.")
 		else:
